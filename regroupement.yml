@@ -1,0 +1,239 @@
+---
+- name: travail de groupe1
+  hosts: backend
+  become: yes
+  tasks:
+  - name: Install Java (prerequisite)
+    yum:
+      name: java-11-amazon-corretto-devel
+      state: present
+
+  - name: Add Jenkins repo
+    get_url:
+      url: https://pkg.jenkins.io/redhat-stable/jenkins.repo
+      dest: /etc/yum.repos.d/jenkins.repo
+      validate_certs: no
+
+  - name: Import Jenkins RPM key
+    rpm_key:
+      key: https://pkg.jenkins.io/redhat/jenkins.io.key
+      state: present
+
+  - name: Install Jenkins
+    yum:
+      name: jenkins
+      state: present
+      enablerepo: jenkins
+
+  - name: Start and Enable Jenkins
+    service:
+      name: jenkins
+      state: started
+      enabled: yes
+  - name: Open Firewall Port
+    firewalld:
+      zone: public
+      port: 8080/tcp
+      permanent: true
+      state: enabled
+      immediate: true
+
+
+  - name: Installer Maven
+  hosts: backend
+  become: yes
+  tasks:
+
+    - name: Télécharger Apache Maven
+      get_url:
+        url: https://downloads.apache.org/maven/maven-3/3.9.4/binaries/apache-maven-3.9.4-bin.tar.gz
+        dest: /tmp/apache-maven-3.9.4-bin.tar.gz
+
+    - name: Extraire Apache Maven
+      ansible.builtin.unarchive:
+        src: /tmp/apache-maven-3.9.4-bin.tar.gz
+        dest: /opt/
+        remote_src: yes
+
+
+
+- name: travail de groupe2
+  hosts: frontend
+  become: yes  # Pour exécuter en tant qu'administrateur (root)
+ ###############OPENJDK11######################################################
+  tasks:
+          #    - name: Installation d'OpenJDK 11
+      #      package:
+              #  name: java-11-amazon-corretto-devel
+        #        state: present
+
+        #    - name: Définir la variable JAVA_HOME
+      #shell: export JAVA_HOME="/usr/lib/jvm/java-11-amazon-corretto.x86_64/bin/"
+ ###################TERRAFORM#################################################
+
+    - name: Télécharger Terraform
+      get_url:
+        url: "https://releases.hashicorp.com/terraform/0.14.10/terraform_0.14.10_linux_amd64.zip"
+        dest: /tmp/terraform_0.14.10_linux_amd64.zip
+
+    - name: Décompresser Terraform
+      unarchive:
+        src: /tmp/terraform_0.14.10_linux_amd64.zip
+        dest: /usr/local/bin
+        remote_src: yes
+        mode: '0755'
+
+    - name: Vérifier l'installation de Terraform
+      command: terraform --version
+      register: terraform_version
+      changed_when: false  # Ne pas marquer comme modifié
+
+    - name: Afficher la version de Terraform
+      debug:
+        var: terraform_version.stdout_lines
+########################TOMCAT#############################################
+    - name: add group "tomcat"
+      group: name=tomcat
+
+    - name: add user "tomcat"
+      user: name=tomcat group=tomcat createhome=yes
+
+    - name: Download Tomcat
+      get_url:
+        url: https://archive.apache.org/dist/tomcat/tomcat-10/v10.0.23/bin/apache-tomcat-10.0.23.tar.gz
+        dest: /tmp/apache-tomcat-10.0.23.tar.gz
+
+    - name: Extract Tomcat
+      ansible.builtin.unarchive:
+        src: /tmp/apache-tomcat-10.0.23.tar.gz
+        dest: /opt/tomcat
+        remote_src: yes
+
+    - name: change owenership of tomcat
+      file: path=/opt/tomcat/apache-tomcat-10.0.23/ owner=tomcat group=tomcat state=directory recurse=yes
+
+    - name: Copier context.xml
+      copy:
+        src: /home/adm1/Tp_ansible/context.xml
+        dest: /opt/tomcat/apache-tomcat-10.0.23/webapps/manager/META-INF/context.xml  # Chemin de destination sur la machine cible
+
+    - name: Copier contexthosts.xml
+      copy:
+        src: /home/adm1/Tp_ansible/contexthosts.xml
+        dest: /opt/tomcat/apache-tomcat-10.0.23/webapps/host-manager/META-INF/context.xml
+
+    - name: copier tomcat-users.xml
+      copy:
+        src: /home/adm1/Tp_ansible/tomcat-users.xml
+        dest: /opt/tomcat/apache-tomcat-10.0.23/conf/tomcat-users.xml
+
+    - name: Copier serveur de tomcat
+      copy:
+        src: /home/adm1/Tp_ansible/tomcat.service
+        dest: /etc/systemd/system/
+
+    - name: Exécuter systemctl daemon-reload
+      command: systemctl daemon-reload
+
+    - name: start Tomcat
+      service:
+        name: tomcat
+        state: started
+        enabled: yes
+
+- name: Travail de groupe3
+  hosts: backend
+  become: yes  # Pour exécuter en tant qu'administrateur (root)
+  tasks:
+    - name: Installation et configuration de Grafana
+      become: yes
+      yum:
+        name: grafana
+        state: present
+      tags:
+        - install
+
+    - name: Démarrage du service Grafana
+      become: yes
+      systemd:
+        name: grafana-server
+        enabled: yes
+        state: started
+      tags:
+        - start_service
+
+    - name: Copy dashboard
+      copy:
+        src: /home/adm1/beta.json
+        dest: /home/ec2-user/Grafana7/beta.json
+      remote_user: ec2-user
+
+    - name: Import Grafana dashboard beta
+      community.grafana.grafana_dashboard:
+        grafana_url: http://ec2-15-237-92-135.eu-west-3.compute.amazonaws.com:3000
+        grafana_user: admin
+        grafana_password: admin
+        state: present
+        commit_message: Updated by ansible
+        overwrite: yes
+        path: /home/ec2-user/Grafana7/beta.json
+
+    - name: Installation de Node Exporter
+      become: yes
+      unarchive:
+        src: /home/ec2-user/Grafana7/node_exporter-0.18.1.linux-amd64.tar.gz
+        dest: /tmp
+        remote_src: true
+      tags:
+        - install
+
+    - name: Démarrage du service Node Exporter
+      become: yes
+      systemd:
+        name: node_exporter.service
+        enabled: yes
+        state: started
+      tags:
+        - start_service
+
+    - name: Installation de Prometheus
+      become: yes
+      unarchive:
+        src: /home/ec2-user/Grafana7/prometheus-2.11.2.linux-amd64.tar.gz
+        dest: /tmp
+        remote_src: true
+      tags:
+        - install
+
+    - name: Démarrage du service Prometheus
+      become: yes
+      systemd:
+        name: prometheus.service
+        enabled: yes
+        state: started
+      tags:
+        - start_service
+
+    - name: Installation du Pushgateway
+      become: yes
+      unarchive:
+        src: /home/ec2-user/Grafana7/pushgateway-0.8.0.linux-amd64.tar.gz
+        dest: /tmp
+        remote_src: true
+      tags:
+        - install
+
+    - name: Démarrage du service Pushgateway
+      become: yes
+      systemd:
+        name: pushgateway.service
+        enabled: yes
+        state: started
+      tags:
+        - start_service
+
+
+
+
+...
+
