@@ -1,60 +1,66 @@
 ---
 - name: travail de groupe1
   hosts: backend
-  become: yes
+  become: true
   tasks:
-  - name: Install Java (prerequisite)
-    yum:
-      name: java-11-amazon-corretto-devel
-      state: present
+    - name: Install Java (prerequisite)
+      yum:
+        name: java-11-amazon-corretto-devel
+        state: present
+    - name: Vérifier si le fichier Jenkins repo existe
+      stat:
+        path: /etc/yum.repos.d/jenkins.repo
+      register: jenkins_repo_status
 
-  - name: Add Jenkins repo
-    get_url:
-      url: https://pkg.jenkins.io/redhat-stable/jenkins.repo
-      dest: /etc/yum.repos.d/jenkins.repo
-      validate_certs: no
-
-  - name: Import Jenkins RPM key
-    rpm_key:
-      key: https://pkg.jenkins.io/redhat/jenkins.io.key
-      state: present
-
-  - name: Install Jenkins
-    yum:
-      name: jenkins
-      state: present
-      enablerepo: jenkins
-
-  - name: Start and Enable Jenkins
-    service:
-      name: jenkins
-      state: started
-      enabled: yes
-  - name: Open Firewall Port
-    firewalld:
-      zone: public
-      port: 8080/tcp
-      permanent: true
-      state: enabled
-      immediate: true
+    - name: Télécharger le fichier Jenkins repo s'il n'existe pas
+      get_url:
+        url: "https://pkg.jenkins.io/redhat-stable/jenkins.repo"
+        dest: /etc/yum.repos.d/jenkins.repo
+        validate_certs: no
+      when: not jenkins_repo_status.stat.exists
 
 
-  - name: Installer Maven
-  hosts: backend
-  become: yes
-  tasks:
+      # - name: Add Jenkins repo
+      # get_url:
+      # url: "https://pkg.jenkins.io/redhat-stable/jenkins.repo"
+      #  dest: /etc/yum.repos.d/jenkins.repo
+      # validate_certs: no
+
+    - name: Import Jenkins RPM key
+      rpm_key:
+        key: https://pkg.jenkins.io/redhat/jenkins.io.key
+        state: present
+
+    - name: Install Jenkins
+      yum:
+        name: jenkins
+        state: present
+        enablerepo: jenkins
+
+    - name: Start and Enable Jenkins
+      service:
+        name: jenkins
+        state: started
+        enabled: yes
+
+    - name: Open Firewall Port
+      firewalld:
+        zone: public
+        port: 8080/tcp
+        permanent: true
+        state: enabled
+        immediate: true
 
     - name: Télécharger Apache Maven
       get_url:
-        url: https://downloads.apache.org/maven/maven-3/3.9.4/binaries/apache-maven-3.9.4-bin.tar.gz
-        dest: /tmp/apache-maven-3.9.4-bin.tar.gz
+        url: "https://downloads.apache.org/maven/maven-3/3.9.4/binaries/apache-maven-3.9.4-bin.tar.gz"
+        dest: /opt/apache-maven-3.9.4-bin.tar.gz
 
     - name: Extraire Apache Maven
       ansible.builtin.unarchive:
-        src: /tmp/apache-maven-3.9.4-bin.tar.gz
+        src: /opt/apache-maven-3.9.4-bin.tar.gz
         dest: /opt/
         remote_src: yes
-
 
 
 - name: travail de groupe2
@@ -62,16 +68,16 @@
   become: yes  # Pour exécuter en tant qu'administrateur (root)
  ###############OPENJDK11######################################################
   tasks:
-          #    - name: Installation d'OpenJDK 11
-      #      package:
-              #  name: java-11-amazon-corretto-devel
-        #        state: present
+    - name: Installation d'OpenJDK 11
+      package:
+         name: java-11-amazon-corretto-devel
+         state: present
 
-        #    - name: Définir la variable JAVA_HOME
-      #shell: export JAVA_HOME="/usr/lib/jvm/java-11-amazon-corretto.x86_64/bin/"
+    - name: Définir la variable JAVA_HOME
+      shell: export JAVA_HOME="/usr/lib/jvm/java-11-amazon-corretto.x86_64/bin/"
  ###################TERRAFORM#################################################
 
-    - name: Télécharger Terraform
+    - name: Telecharger Terraform
       get_url:
         url: "https://releases.hashicorp.com/terraform/0.14.10/terraform_0.14.10_linux_amd64.zip"
         dest: /tmp/terraform_0.14.10_linux_amd64.zip
@@ -100,7 +106,7 @@
 
     - name: Download Tomcat
       get_url:
-        url: https://archive.apache.org/dist/tomcat/tomcat-10/v10.0.23/bin/apache-tomcat-10.0.23.tar.gz
+        url: "https://archive.apache.org/dist/tomcat/tomcat-10/v10.0.23/bin/apache-tomcat-10.0.23.tar.gz"
         dest: /tmp/apache-tomcat-10.0.23.tar.gz
 
     - name: Extract Tomcat
