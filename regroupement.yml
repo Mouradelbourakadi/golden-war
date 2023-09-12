@@ -28,8 +28,9 @@
 
     - name: Import Jenkins RPM key
       rpm_key:
-        key: https://pkg.jenkins.io/redhat/jenkins.io.key
+        key: "https://pkg.jenkins.io/redhat/jenkins.io.key"
         state: present
+   
 
     - name: Install Jenkins
       yum:
