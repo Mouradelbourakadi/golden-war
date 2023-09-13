@@ -7,24 +7,24 @@
       yum:
         name: java-11-amazon-corretto-devel
         state: present
-    - name: Vérifier si le fichier Jenkins repo existe
-      stat:
-        path: /etc/yum.repos.d/jenkins.repo
-      register: jenkins_repo_status
+        # - name: Vérifier si le fichier Jenkins repo existe
+        # stat:
+        # path: /etc/yum.repos.d/jenkins.repo
+        # register: jenkins_repo_status
 
-    - name: Télécharger le fichier Jenkins repo s'il n'existe pas
+        # - name: Télécharger le fichier Jenkins repo s'il n'existe pas
+        # get_url:
+        # url: "https://pkg.jenkins.io/redhat-stable/jenkins.repo"
+        # dest: /etc/yum.repos.d/jenkins.repo
+        # validate_certs: no
+        # when: not jenkins_repo_status.stat.exists
+
+
+    - name: Add Jenkins repo
       get_url:
         url: "https://pkg.jenkins.io/redhat-stable/jenkins.repo"
         dest: /etc/yum.repos.d/jenkins.repo
         validate_certs: no
-      when: not jenkins_repo_status.stat.exists
-
-
-      # - name: Add Jenkins repo
-      # get_url:
-      # url: "https://pkg.jenkins.io/redhat-stable/jenkins.repo"
-      #  dest: /etc/yum.repos.d/jenkins.repo
-      # validate_certs: no
 
     - name: Import Jenkins RPM key
       rpm_key:
