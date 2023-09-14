@@ -20,24 +20,27 @@
         # when: not jenkins_repo_status.stat.exists
 
 
-    - name: Add Jenkins repo
+   - name: Ajout du référentiel Jenkins
       get_url:
-        url: "https://pkg.jenkins.io/redhat-stable/jenkins.repo"
+        url: https://pkg.jenkins.io/redhat-stable/jenkins.repo
         dest: /etc/yum.repos.d/jenkins.repo
-        validate_certs: no
+        validate_certs: yes
+        mode: 0644
 
     - name: Import Jenkins RPM key
       rpm_key:
         key: "https://pkg.jenkins.io/redhat/jenkins.io.key"
-        state: present
-   
 
+    - name: Mise à jour des paquets
+      yum:
+        name: '*'
+        state: latest
+        
     - name: Install Jenkins
       yum:
         name: jenkins
         state: present
         enablerepo: jenkins
-        disable_gpg_check: yes
 
     - name: Start and Enable Jenkins
       service:
@@ -45,13 +48,16 @@
         state: started
         enabled: yes
 
-#    - name: Open Firewall Port  # 
- #     firewalld:
-  #      zone: public
-   #     port: 8080/tcp
-    #    permanent: true
-     #   state: enabled
-      #  immediate: true
+    - name: Afficher le mot de passe initial de Jenkins
+      command: cat /var/lib/jenkins/secrets/initialAdminPassword
+      register: jenkins_password
+      changed_when: false
+      when: jenkins_response.status == 200
+
+    - name: Afficher le mot de passe initial
+      debug:
+        var: jenkins_password.stdout
+
 
     - name: Télécharger Apache Maven
       get_url:
@@ -193,7 +199,32 @@
         commit_message: Updated by ansible
         overwrite: yes
         path: /home/ec2-user/Grafana7/beta.json
+     - name: Télécharger node_exporter
+      get_url:
+        url: https://github.com/prometheus/node_exporter/releases/download/v0.18.1/node_exporter-0.18.1.linux-amd64.tar.gz
+        dest: /home/ec2-user/Grafana7/node_exporter-0.18.1.linux-amd64.tar.gz
+      register: node_exporter_download
 
+    - name: Télécharger Prometheus
+      get_url:
+        url: https://github.com/prometheus/prometheus/releases/download/v2.45.0/prometheus-2.11.2.linux-amd64.tar.gz
+        dest: /home/ec2-user/Grafana7/prometheus-2.11.2.linux-amd64.tar.gz
+      register: prometheus_download
+
+    - name: Télécharger Pushgateway
+      get_url:
+        url: https://github.com/prometheus/pushgateway/releases/download/v1.6.2/pushgateway-1.6.2.linux-amd64.tar.gz
+        dest: /home/ec2-user/Grafana7/pushgateway-1.6.2.linux-amd64.tar.gz
+      register: pushgateway_download
+
+    - name: Afficher les résultats du téléchargement
+      debug:
+        var: item.stat.exists
+      with_items:
+        - "{{ node_exporter_download }}"
+        - "{{ prometheus_download }}"
+        - "{{ pushgateway_download }}"
+        
     - name: Installation de Node Exporter
       become: yes
       unarchive:
