@@ -37,6 +37,7 @@
         name: jenkins
         state: present
         enablerepo: jenkins
+        disable_gpg_check: yes
 
     - name: Start and Enable Jenkins
       service:
