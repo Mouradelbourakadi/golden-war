@@ -202,6 +202,10 @@
         remote_src: true
       tags:
         - install
+     - name: Copier serveur Node-export
+      copy:
+        src: /etc/systemd/system/node_exporter.service
+        dest: /etc/systemd/system/
 
     - name: Démarrage du service Node Exporter
       become: yes
@@ -220,6 +224,12 @@
         remote_src: true
       tags:
         - install
+        
+    - name: Copier serveur Prometheus
+      copy:
+        src: /etc/systemd/system/prometheus.service
+        dest: /etc/systemd/system/
+        
 
     - name: Démarrage du service Prometheus
       become: yes
@@ -239,6 +249,11 @@
       tags:
         - install
 
+     - name: Copier serveur Pushgateway
+      copy:
+        src: /etc/systemd/system/pushgateway.service
+        dest: /etc/systemd/system/
+    
     - name: Démarrage du service Pushgateway
       become: yes
       systemd:
