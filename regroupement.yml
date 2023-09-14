@@ -110,6 +110,10 @@
       get_url:
         url: "https://archive.apache.org/dist/tomcat/tomcat-10/v10.0.23/bin/apache-tomcat-10.0.23.tar.gz"
         dest: /tmp/apache-tomcat-10.0.23.tar.gz
+    - name: Créer /opt/tomact
+      file:
+        path: /opt/tomcat
+        state: directory
 
     - name: Extract Tomcat
       ansible.builtin.unarchive:
@@ -169,6 +173,10 @@
         state: started
       tags:
         - start_service
+    - name: Créer /home/ec2-user/Grafana7
+      file:
+        path: /home/ec2-user/Grafana7
+        state: directory
 
     - name: Copy dashboard
       copy:
@@ -178,7 +186,7 @@
 
     - name: Import Grafana dashboard beta
       community.grafana.grafana_dashboard:
-        grafana_url: http://ec2-15-237-92-135.eu-west-3.compute.amazonaws.com:3000
+        grafana_url: ec2-13-38-246-215.eu-west-3.compute.amazonaws.com:3000
         grafana_user: admin
         grafana_password: admin
         state: present
