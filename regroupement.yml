@@ -15,9 +15,15 @@
         validate_certs: yes
         mode: '0644'
 
-    - name: Import Jenkins RPM key
-      rpm_key:
-        key: https://pkg.jenkins.io/redhat/jenkins.io.key
+    - name: Import Jenkins GPG key
+      yum_key:
+        name: RPM-GPG-KEY-jenkins
+        state: present
+    - name: Install Jenkins RPM
+      yum:
+        name: /path/to/jenkins-2.414.1-1.1.noarch.rpm
+        state: present
+        
 
     - name: Mise à jour des paquets
       yum:
