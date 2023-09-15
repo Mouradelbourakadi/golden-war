@@ -194,11 +194,11 @@
         dest: /home/ec2-user/Grafana7/node_exporter-0.18.1.linux-amd64.tar.gz
       register: node_exporter_download
 
-    - name: Télécharger Prometheus
-      get_url:
-        url: https://github.com/prometheus/prometheus/releases/download/v2.45.0/prometheus-2.11.2.linux-amd64.tar.gz
-        dest: /home/ec2-user/Grafana7/
-      register: prometheus_download
+  #  - name: Télécharger Prometheus
+  #    get_url:
+  #     url: https://github.com/prometheus/prometheus/releases/download/v2.45.0/prometheus-2.11.2.linux-amd64.tar.gz
+  #      dest: /home/ec2-user/Grafana7/
+  #   register: prometheus_download
 
     - name: Télécharger Pushgateway
       get_url:
