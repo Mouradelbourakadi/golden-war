@@ -144,8 +144,6 @@
         name: tomcat
         state: started
         enabled: yes
-
----
 - name: Travail de groupe3
   hosts: backend
   become: yes  # Pour exécuter en tant qu'administrateur (root)
