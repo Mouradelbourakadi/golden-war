@@ -197,13 +197,13 @@
     - name: Télécharger Prometheus
       get_url:
         url: https://github.com/prometheus/prometheus/releases/download/v2.45.0/prometheus-2.11.2.linux-amd64.tar.gz
-        dest: /home/ec2-user/Grafana7/prometheus-2.11.2.linux-amd64.tar.gz
+        dest: /home/ec2-user/Grafana7/
       register: prometheus_download
 
     - name: Télécharger Pushgateway
       get_url:
         url: https://github.com/prometheus/pushgateway/releases/download/v1.6.2/pushgateway-1.6.2.linux-amd64.tar.gz
-        dest: /home/ec2-user/Grafana7/pushgateway-1.6.2.linux-amd64.tar.gz
+        dest: /home/ec2-user/Grafana7/
       register: pushgateway_download
 
     - name: Afficher les résultats du téléchargement
