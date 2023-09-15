@@ -145,6 +145,7 @@
         state: started
         enabled: yes
 
+---
 - name: Travail de groupe3
   hosts: backend
   become: yes  # Pour exécuter en tant qu'administrateur (root)
@@ -165,6 +166,7 @@
         state: started
       tags:
         - start_service
+
     - name: Créer /home/ec2-user/Grafana7
       file:
         path: /home/ec2-user/Grafana7
@@ -185,7 +187,8 @@
         commit_message: Updated by ansible
         overwrite: yes
         path: /home/ec2-user/Grafana7/beta.json
-     - name: Télécharger node_exporter
+
+    - name: Télécharger node_exporter
       get_url:
         url: https://github.com/prometheus/node_exporter/releases/download/v0.18.1/node_exporter-0.18.1.linux-amd64.tar.gz
         dest: /home/ec2-user/Grafana7/node_exporter-0.18.1.linux-amd64.tar.gz
@@ -210,7 +213,7 @@
         - "{{ node_exporter_download }}"
         - "{{ prometheus_download }}"
         - "{{ pushgateway_download }}"
-        
+
     - name: Installation de Node Exporter
       become: yes
       unarchive:
@@ -219,7 +222,8 @@
         remote_src: true
       tags:
         - install
-     - name: Copier serveur Node-export
+
+    - name: Copier serveur Node-export
       copy:
         src: /etc/systemd/system/node_exporter.service
         dest: /etc/systemd/system/
@@ -241,12 +245,11 @@
         remote_src: true
       tags:
         - install
-        
+
     - name: Copier serveur Prometheus
       copy:
         src: /etc/systemd/system/prometheus.service
         dest: /etc/systemd/system/
-        
 
     - name: Démarrage du service Prometheus
       become: yes
@@ -260,17 +263,17 @@
     - name: Installation du Pushgateway
       become: yes
       unarchive:
-        src: /home/ec2-user/Grafana7/pushgateway-0.8.0.linux-amd64.tar.gz
+        src: /home/ec2-user/Grafana7/pushgateway-1.6.2.linux-amd64.tar.gz
         dest: /tmp
         remote_src: true
       tags:
         - install
 
-     - name: Copier serveur Pushgateway
+    - name: Copier serveur Pushgateway
       copy:
         src: /etc/systemd/system/pushgateway.service
         dest: /etc/systemd/system/
-    
+
     - name: Démarrage du service Pushgateway
       become: yes
       systemd:
@@ -279,9 +282,4 @@
         state: started
       tags:
         - start_service
-
-
-
-
-...
 
