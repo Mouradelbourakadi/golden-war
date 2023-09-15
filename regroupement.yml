@@ -178,15 +178,15 @@
         dest: /home/ec2-user/Grafana7/beta.json
       remote_user: ec2-user
 
-    - name: Import Grafana dashboard beta
-      community.grafana.grafana_dashboard:
-        grafana_url: ec2-15-236-248-165.eu-west-3.compute.amazonaws.com:3000
-        grafana_user: admin
-        grafana_password: admin
-        state: present
-        commit_message: Updated by ansible
-        overwrite: yes
-        path: /home/ec2-user/Grafana7/beta.json
+#    - name: Import Grafana dashboard beta
+ #     community.grafana.grafana_dashboard:
+   #     grafana_url: ec2-15-236-248-165.eu-west-3.compute.amazonaws.com:3000
+   #     grafana_user: admin
+   #     grafana_password: admin
+     #   state: present
+  #      commit_message: Updated by ansible
+    #    overwrite: yes
+     #   path: /home/ec2-user/Grafana7/beta.json
 
     - name: Télécharger node_exporter
       get_url:
