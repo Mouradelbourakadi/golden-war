@@ -19,13 +19,7 @@
       rpm_key:
         key: https://pkg.jenkins.io/redhat/jenkins.io.key
         state: present
-
-    - name: Install Jenkins RPM
-      yum:
-        name: /opt/jenkins-2.414.1-1.1.noarch.rpm
-        state: present
         
-
     - name: Mise à jour des paquets
       yum:
         name: '*'
