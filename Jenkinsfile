@@ -19,7 +19,7 @@ pipeline {
     }
     stage('deploy') {
         steps {
-            //sh "mkdir -p /appli/archiveArtifacts"
+            sh "mkdir -p /appli/archiveArtifacts"
             sh "cp golden/target/*.war /appli/archiveArtifacts"
         }
     }
