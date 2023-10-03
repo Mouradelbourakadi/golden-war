@@ -17,11 +17,11 @@ pipeline {
              sh "mvn -Dmaven.test.failure.ignore=true clean package"
         }
     }
-    stage('deploy') {
-        steps {
-            sh "mkdir -p /appli/archiveArtifacts"
-            sh "cp golden/target/*.war /appli/archiveArtifacts"
-        }
-    }
+  // stage('deploy') {
+  //      steps {
+  //          sh "mkdir -p /appli/archiveArtifacts"
+  //          sh "cp golden/target/*.war /appli/archiveArtifacts"
+  //      }
+  //  }
 }
 }
