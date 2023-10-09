@@ -5,6 +5,9 @@ pipeline {
         // Installer la version de Maven configurée comme "M3" et l'ajouter au chemin.
         maven "maven3.9"
     }
+    environment {
+        SSH_KEY = credentials('omega_frontend_key.pem')
+    }
 
     stages {
         stage('Clone') {
@@ -22,9 +25,11 @@ pipeline {
         stage('Deploy to AWS') {
             steps {
                 script {
-                    // Copier le fichier WAR vers l'instance AWS distante en utilisant SCP
-                    def remoteWarPath = "/appli/"
-                    sh "scp -i omega_frontend_key.pem golden/target/*.war ec2-user@15.237.3.23:${remoteWarPath}"
+                    sshagent(credentials: ['omega_frontend_key.pem']) {
+                        sh """
+                            scp -i \${SSH_KEY} golden/target/*.war ec2-user@15.237.3.23:/appli/
+                        """
+                    }
                 }
             }
         }
