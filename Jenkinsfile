@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     tools {
-        // Install the Maven version configured as "M3" and add it to the path.
+        // Installer la version de Maven configurée comme "M3" et l'ajouter au chemin.
         maven "maven3.9"
     }
 
@@ -22,8 +22,8 @@ pipeline {
         stage('Deploy to AWS') {
             steps {
                 script {
-                    // Copy the WAR file to the remote AWS instance using SCP
-                    def remoteWarPath = "/appli/*.war"
+                    // Copier le fichier WAR vers l'instance AWS distante en utilisant SCP
+                    def remoteWarPath = "/appli/"
                     sh "scp -i omega_frontend_key.pem golden/target/*.war ec2-user@15.237.3.23:${remoteWarPath}"
                 }
             }
@@ -32,7 +32,7 @@ pipeline {
         stage('Start Tomcat Container') {
             steps {
                 script {
-                    // Start the Tomcat Docker container on the AWS instance
+                    // Démarrer le conteneur Docker Tomcat sur l'instance AWS
                     def containerCommand = "docker run -d -p 8080:8080 -v /appli/*.war:/usr/local/tomcat/webapps/ tomcat:tomcat"
                     sh "ssh ec2-user@15.237.3.23 '${containerCommand}'"
                 }
@@ -42,8 +42,8 @@ pipeline {
         stage('Verify Deployment') {
             steps {
                 script {
-                    // Add steps to verify the deployment, e.g., running tests or checking application accessibility
-                    sh "ssh ec2-user@$15.237.3.23 'ls -l /appli'"
+                    // Ajouter des étapes pour vérifier le déploiement, par exemple, exécuter des tests ou vérifier l'accessibilité de l'application
+                    sh "ssh ec2-user@15.237.3.23 'ls -l /appli'"
                 }
             }
         }
