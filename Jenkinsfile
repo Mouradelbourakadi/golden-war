@@ -5,50 +5,38 @@ pipeline {
         // Installer la version de Maven configurée comme "M3" et l'ajouter au chemin.
         maven "maven3.9"
     }
+    
     environment {
-        SSH_KEY = credentials('omega_frontend_key.pem')
+        REMOTE_HOST = '15.237.3.23'
+        REMOTE_PATH = '/appli/'
     }
-
+    
     stages {
         stage('Clone') {
             steps {
+                // Cloner le référentiel Git
                 git 'https://github.com/Mouradelbourakadi/golden-war.git'
             }
         }
 
         stage('Build') {
             steps {
+                // Construire le projet avec Maven
                 sh "mvn -Dmaven.test.failure.ignore=true clean package"
             }
         }
-
-        stage('Deploy to AWS') {
+        
+        stage('Connection copy deploy') {
             steps {
                 script {
-                    sshagent(credentials: ['omega_frontend_key.pem']) {
-                        sh """
-                            scp -i \${SSH_KEY} golden/target/*.war ec2-user@15.237.3.23:/appli/
-                        """
+                    // Utilisation de sshagent pour gérer les clés SSH
+                    sshagent(credentials: ['omeg_frontend_key']) {
+                        // Copier le fichier WAR sur le serveur distant
+                        sh "scp golden/target/*.war ec2-user@${REMOTE_HOST}:${REMOTE_PATH}"
+                        // Exécuter le conteneur Docker sur le serveur distant
+                        sh "ssh ec2-user@${REMOTE_HOST} 'docker stop \$(docker ps -a -q)'"
+                        sh "ssh ec2-user@${REMOTE_HOST} 'docker run -d -p 8080:8080 -v ${REMOTE_PATH}/*.war:/usr/local/tomcat/webapps/ tomcat:latest'"
                     }
-                }
-            }
-        }
-
-        stage('Start Tomcat Container') {
-            steps {
-                script {
-                    // Démarrer le conteneur Docker Tomcat sur l'instance AWS
-                    def containerCommand = "docker run -d -p 8080:8080 -v /appli/*.war:/usr/local/tomcat/webapps/ tomcat:tomcat"
-                    sh "ssh ec2-user@15.237.3.23 '${containerCommand}'"
-                }
-            }
-        }
-
-        stage('Verify Deployment') {
-            steps {
-                script {
-                    // Ajouter des étapes pour vérifier le déploiement, par exemple, exécuter des tests ou vérifier l'accessibilité de l'application
-                    sh "ssh ec2-user@15.237.3.23 'ls -l /appli'"
                 }
             }
         }
