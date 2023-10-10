@@ -34,8 +34,7 @@ pipeline {
                         // Copier le fichier WAR sur le serveur distant
                         sh "scp golden/target/golden.war ec2-user@${REMOTE_HOST}:${REMOTE_PATH}"
                         // Exécuter le conteneur Docker sur le serveur distant
-                        //sh "ssh ec2-user@${REMOTE_HOST} 'docker stop tomcat-container'"
-                        sh "ssh ec2-user@${REMOTE_HOST} 'docker run -d -p 8080:8080 --name tomcat-container -v ${REMOTE_PATH}/golden.war:/usr/local/tomcat/webapps/ tomcat:8'"
+                        sh "ssh ec2-user@${REMOTE_HOST} 'docker cp ${REMOTE_PATH}/golden.war tomcat-container:/usr/local/tomcat/webapps/'"
                     }
                 }
             }
