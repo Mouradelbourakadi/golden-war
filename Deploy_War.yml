@@ -16,7 +16,3 @@
           src: /appli/golden.war
           dest: /usr/local/tomcat/webapps/golden.war
 
-    - name: Restart Docker container
-      ansible.builtin.docker_container:
-        name: 3e5e5bf5e77f
-        state: restarted
