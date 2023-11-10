@@ -10,7 +10,7 @@
         dest: /appli/golden.war
 
     - name: Copy WAR file into Docker container Tomcat
-      command: docker cp /appli/golden.war {{ 3e5e5bf5e77f }}:/usr/local/tomcat/webapps/
+      command: docker cp /appli/golden.war 3e5e5bf5e77f:/usr/local/tomcat/webapps/
 
           
     - name: Restart Docker container
